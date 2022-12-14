@@ -1,4 +1,4 @@
-import dsmil as mil
+from aggregator_models import dsmil as mil
 
 import torch
 import torch.nn as nn
@@ -13,8 +13,9 @@ import numpy as np
 from PIL import Image
 from collections import OrderedDict
 from sklearn.utils import shuffle
-
-
+from pretrain_models_weight.pretrain_model import Pretrain_model
+from pretrain_models_weight.simclr_weight import Simclr_weight
+from pretrain_models_weight.simsiam_weight import Simsiam_weight
 
 class BagDataset():
     def __init__(self, csv_file, transform=None):
@@ -134,6 +135,7 @@ def main():
     parser.add_argument('--weights_high', default=None, type=str, help='Folder of the pretrained weights of high magnification, FOLDER < `simclr/runs/[FOLDER]`')
     parser.add_argument('--weights_low', default=None, type=str, help='Folder of the pretrained weights of low magnification, FOLDER <`simclr/runs/[FOLDER]`')
     parser.add_argument('--dataset', default='TCGA-lung-single', type=str, help='Dataset folder name [TCGA-lung-single]')
+    parser.add_argument('--pretrain_model', default='simsiam', type=str, help='pretrain model type')
     args = parser.parse_args()
     gpu_ids = tuple(args.gpu_index)
     os.environ['CUDA_VISIBLE_DEVICES']=','.join(str(x) for x in gpu_ids)
@@ -164,6 +166,7 @@ def main():
         num_feats = 2048
     for param in resnet.parameters():
         param.requires_grad = False
+
     resnet.fc = nn.Identity()
     print(args.magnification, args.weights_high, args.weights_low)
     if args.magnification == 'tree' and args.weights_high != None and args.weights_low != None:
@@ -207,29 +210,27 @@ def main():
 
     elif args.magnification == 'single' or args.magnification == 'high' or args.magnification == 'low':  
         i_classifier = mil.IClassifier(resnet, num_feats, output_class=args.num_classes).cuda()
+        pretrain_weight = None
+        if args.pretrain_model.lower() == 'simclr':
+            pretrain_weight = Simclr_weight(args)
 
-        if args.weights == 'ImageNet':
-            if args.norm_layer == 'batch':
-                print('Use ImageNet features.')
-            else:
-                print('Please use batch normalization for ImageNet feature')
-        else:
-            if args.weights is not None:
-                weight_path = os.path.join('simclr', 'runs', args.weights, 'checkpoints', 'model.pth')
-            else:
-                weight_path = glob.glob('simclr/runs/*/checkpoints/*.pth')[-1]
-            state_dict_weights = torch.load(weight_path)
-            for i in range(4):
-                state_dict_weights.popitem()
-            state_dict_init = i_classifier.state_dict()
-            new_state_dict = OrderedDict()
-            for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
-                name = k_0
-                new_state_dict[name] = v
-            i_classifier.load_state_dict(new_state_dict, strict=False)
-            os.makedirs(os.path.join('embedder', args.dataset), exist_ok=True)
-            torch.save(new_state_dict, os.path.join('embedder', args.dataset, 'embedder.pth'))
-            print('Use pretrained features.')
+        if args.pretrain_model.lower() == 'simsiam':
+            pretrain_weight = Simsiam_weight(args)
+
+        if args.weights == None:
+            print('Please give the pretrained weight path')
+            return
+
+        state_dict_weights = pretrain_weight.load_weight()
+        state_dict_init = i_classifier.state_dict()
+        new_state_dict = OrderedDict()
+        for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
+            name = k_0
+            new_state_dict[name] = v
+        i_classifier.load_state_dict(new_state_dict, strict=False)
+        os.makedirs(os.path.join('embedder', args.dataset), exist_ok=True)
+        torch.save(new_state_dict, os.path.join('embedder', args.dataset, 'embedder.pth'))
+        print('Use pretrained features.')
     
     if args.magnification == 'tree' or args.magnification == 'low' or args.magnification == 'high' :
         bags_path = os.path.join('WSI', args.dataset, 'pyramid', '*', '*')
