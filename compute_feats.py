@@ -13,9 +13,10 @@ import numpy as np
 from PIL import Image
 from collections import OrderedDict
 from sklearn.utils import shuffle
-from pretrain_models_weight.pretrain_model import Pretrain_model
 from pretrain_models_weight.simclr_weight import Simclr_weight
 from pretrain_models_weight.simsiam_weight import Simsiam_weight
+from pretrain_models_weight.moco_weight import Moco_weight
+
 
 class BagDataset():
     def __init__(self, csv_file, transform=None):
@@ -217,11 +218,16 @@ def main():
         if args.pretrain_model.lower() == 'simsiam':
             pretrain_weight = Simsiam_weight(args)
 
+        if args.pretrain_model.lower() == 'moco':
+            pretrain_weight = Moco_weight(args)
+
         if args.weights == None:
             print('Please give the pretrained weight path')
             return
 
-        state_dict_weights = pretrain_weight.load_weight()
+        state_dict_weights = pretrain_weight.get_backbone()
+        pretrain_weight.show_backbone_arch()
+
         state_dict_init = i_classifier.state_dict()
         new_state_dict = OrderedDict()
         for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
@@ -237,6 +243,7 @@ def main():
     else:
         bags_path = os.path.join('WSI', args.dataset, 'single', '*', '*')
         print('single bag')
+
     feats_path = os.path.join('datasets', args.dataset)
         
     os.makedirs(feats_path, exist_ok=True)

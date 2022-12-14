@@ -1,10 +1,10 @@
 #!/bin/bash
 DATASET='C16_patch'
-WEIGHT='contrastive_models/simsiam/weight/checkpoint_0381.pth.tar'
+WEIGHT='contrastive_models/moco/weight/checkpoint_0068.pth.tar'
 GPU_ID='2 3'
 LAYER='batch'
 BACKBONE='resnet50'
-PRETRAIN_MODEL='simsiam'
+PRETRAIN_MODEL='moco'
 
 python compute_feats.py --dataset=${DATASET} --weights=${WEIGHT} \
 	--num_classes 1 --gpu_index ${GPU_ID} \
