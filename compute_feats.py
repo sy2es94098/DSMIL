@@ -175,38 +175,61 @@ def main():
         i_classifier_h = mil.IClassifier(resnet, num_feats, output_class=args.num_classes).cuda()
         i_classifier_l = mil.IClassifier(copy.deepcopy(resnet), num_feats, output_class=args.num_classes).cuda()
         
-        if args.weights_high == 'ImageNet' or args.weights_low == 'ImageNet' or args.weights== 'ImageNet':
-            if args.norm_layer == 'batch':
-                print('Use ImageNet features.')
-            else:
-                raise ValueError('Please use batch normalization for ImageNet feature')
-        else:
-            weight_path = os.path.join('simclr', 'runs', args.weights_high, 'checkpoints', 'model.pth')
-            state_dict_weights = torch.load(weight_path)
-            for i in range(4):
-                state_dict_weights.popitem()
-            state_dict_init = i_classifier_h.state_dict()
-            new_state_dict = OrderedDict()
-            for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
-                name = k_0
-                new_state_dict[name] = v
-            i_classifier_h.load_state_dict(new_state_dict, strict=False)
-            os.makedirs(os.path.join('embedder', args.dataset), exist_ok=True)
-            torch.save(new_state_dict, os.path.join('embedder', args.dataset, 'embedder-high.pth'))
+        pretrain_weight = None
 
-            weight_path = os.path.join('simclr', 'runs', args.weights_low, 'checkpoints', 'model.pth')
-            state_dict_weights = torch.load(weight_path)
-            for i in range(4):
-                state_dict_weights.popitem()
-            state_dict_init = i_classifier_l.state_dict()
-            new_state_dict = OrderedDict()
-            for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
-                name = k_0
-                new_state_dict[name] = v
-            i_classifier_l.load_state_dict(new_state_dict, strict=False)
-            os.makedirs(os.path.join('embedder', args.dataset), exist_ok=True)
-            torch.save(new_state_dict, os.path.join('embedder', args.dataset, 'embedder-low.pth'))
-            print('Use pretrained features.')
+        args_h = args
+        args_h.weights = args.weights
+        if args.pretrain_model.lower() == 'simclr':
+            pretrain_weight = Simclr_weight(args_h)
+
+        if args.pretrain_model.lower() == 'simsiam':
+            pretrain_weight = Simsiam_weight(args_h)
+
+        if args.pretrain_model.lower() == 'moco':
+            pretrain_weight = Moco_weight(args_h)
+
+        if args.weights == None:
+            print('Please give the pretrained weight path')
+            return
+
+        
+        state_dict_weights =  pretrain_weight.get_backbone()
+        state_dict_init = i_classifier_h.state_dict()
+        new_state_dict = OrderedDict()
+        for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
+            name = k_0
+            new_state_dict[name] = v
+        i_classifier_h.load_state_dict(new_state_dict, strict=False)
+        os.makedirs(os.path.join('embedder', args.dataset), exist_ok=True)
+        torch.save(new_state_dict, os.path.join('embedder', args.dataset, 'embedder-high.pth'))
+
+
+        args_l = args
+        args_l.weights = args.weights
+        pretrain_weight = None
+        if args.pretrain_model.lower() == 'simclr':
+            pretrain_weight = Simclr_weight(args_l)
+
+        if args.pretrain_model.lower() == 'simsiam':
+            pretrain_weight = Simsiam_weight(args_l)
+
+        if args.pretrain_model.lower() == 'moco':
+            pretrain_weight = Moco_weight(args_l)
+
+        if args.weights == None:
+            print('Please give the pretrained weight path')
+            return
+
+        state_dict_weights =  pretrain_weight.get_backbone()
+        state_dict_init = i_classifier_l.state_dict()
+        new_state_dict = OrderedDict()
+        for (k, v), (k_0, v_0) in zip(state_dict_weights.items(), state_dict_init.items()):
+            name = k_0
+            new_state_dict[name] = v
+        i_classifier_l.load_state_dict(new_state_dict, strict=False)
+        os.makedirs(os.path.join('embedder', args.dataset), exist_ok=True)
+        torch.save(new_state_dict, os.path.join('embedder', args.dataset, 'embedder-low.pth'))
+        print('Use pretrained features.')
 
 
     elif args.magnification == 'single' or args.magnification == 'high' or args.magnification == 'low':  
