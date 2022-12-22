@@ -176,7 +176,7 @@ def main():
     if args.model == 'dsmil':
         #pass
         state_dict_weights = torch.load('init.pth')
-        print('Load succ')
+        print('Load init.pth')
         try:
             milnet.load_state_dict(state_dict_weights, strict=False)
         except:
