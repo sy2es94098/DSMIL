@@ -1,12 +1,11 @@
 #!/bin/bash
-DATASET=C16_paper5
-FEATS_SIZE=512
-LR=0.00006
-EP=10
-GPU_ID='3'
-SEED=9
-#WEIGHT='weights/simsiam_30ep/1.pth'
-python train_tcga.py --dataset=${DATASET} --num_classes 1 --feats_size ${FEATS_SIZE} \
-		     --lr ${LR} --num_epochs ${EP} --gpu_index ${GPU_ID} --split 0.1 --seed ${SEED}
-#		     --aggregator_weights ${WEIGHT}
 
+DATASET=C16_paper_simsiam_24ep
+FEATS_SIZE=2048
+LR=0.0002
+EP=5
+GPU_ID='2 3'
+SEED=9
+
+python train_aggregator.py --dataset=${DATASET} --num_classes 1 --feats_size ${FEATS_SIZE} \
+						--lr ${LR} --num_epochs ${EP} --gpu_index ${GPU_ID} --split 0.1 --seed ${i}

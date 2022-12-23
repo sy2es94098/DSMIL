@@ -116,6 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('--embedder_weights', type=str, default='test-c16/weights/embedder.pth')
     parser.add_argument('--aggregator_weights', type=str, default='test-c16/weights/aggregator.pth')
     parser.add_argument('--patch_ext', type=str, default='jpeg')
+    parser.add_argument('--norm', type=str, default='b')
 
     args = parser.parse_args()
 
