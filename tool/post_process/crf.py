@@ -104,7 +104,6 @@ for f in tqdm.tqdm(files):
             cv2.imwrite(store,y)
             continue
 
-
         X = cv2.resize(X, None, fx=0.3, fy=0.3, interpolation=cv2.INTER_AREA)
         y = cv2.resize(y, None, fx=0.3, fy=0.3, interpolation=cv2.INTER_AREA)
 
@@ -114,7 +113,3 @@ for f in tqdm.tqdm(files):
         ret, th = cv2.threshold(crfimage, 127, 255, cv2.THRESH_BINARY)
         
         cv2.imwrite(store,th)
-        
-
-        
-        

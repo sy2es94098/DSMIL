@@ -4,20 +4,28 @@ from  matplotlib import pyplot as plt
 import os
 from scipy import ndimage as nd
 import openslide
+import sys, argparse, os, copy, itertools, glob, datetime
+Image.MAX_IMAGE_PIXELS=None
 
-path = "/data1/ian/C16_test_mask/"
-store_path = "/data1/ian/C16_training_index_3/C16_testing_index_3/mask"
-files = os.listdir(path)
+parser = argparse.ArgumentParser(description='Train DSMIL on 20x patch features learned by SimCLR')
+parser.add_argument('--dir', default=None, type=str, help='Image directory')
+parser.add_argument('--sample_dir', default=None, type=str, help='Reference directory')
+parser.add_argument('--store_dir', default=None, type=str, help='Result store directory')
+parser.add_argument('--level', default=0, type=int, help='WSI retrieve  level')
+parser.add_argument('--ext', default=0, type=int, help='file extend')
+args = parser.parse_args()
 
-zoom_level = 3
+img_path = args.dir
+
+files = os.listdir(img_path)
+file_handler = None
+
+if args.ext == 'tif' or args.ext == 'tiff':
+    file_handler=Tiff_handler(args)
+elif args.ext == 'png':
+    file_handler=Png_handler(args)
 
 for f in files:
-    file = os.path.join(path,f)
-    slide = openslide.open_slide(file)
-    w, h = slide.level_dimensions[zoom_level]
-    print(w,h)
-    slide = slide.read_region((0, 0),zoom_level, (w, h))
-    
-    store_file = os.path.join(store_path,f[:-3]+'png')
-    slide.save(store_file)
-    print(store_file)
+    file_handler.get_item(f)
+    file_handler.resize(f)
+    file_handler.store_file(f)

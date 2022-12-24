@@ -109,7 +109,3 @@ for f in tqdm.tqdm(files):
         
     store = os.path.join(store_path, file_name)
     cv2.imwrite(store,th)
-        
-
-        
-        

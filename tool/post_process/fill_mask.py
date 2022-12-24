@@ -7,8 +7,6 @@ import sys
 
 Image.MAX_IMAGE_PIXELS=10000000000000
 
-#path = "/data3/ian/dsmil-wsi/test-c16/binary_attention_mask60"
-#store_path = "/data3/ian/dsmil-wsi/test-c16/binary_attention_mask60"
 path = sys.argv[1]
 store_path = path
 
@@ -23,4 +21,3 @@ for f in files:
     print(f)
     store_file = os.path.join(store_path,f)
     binary.save(store_file)
-    
