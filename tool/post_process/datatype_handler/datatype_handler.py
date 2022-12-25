@@ -2,7 +2,7 @@ import abc
 import os
 from PIL import Image
 
-class Data_type_handler(metaclass=abc.ABCMeta):
+class Datatype_handler(metaclass=abc.ABCMeta):
     def __init__(self,args):
         self.args=args
         self.process_file = None

@@ -5,14 +5,17 @@ import os
 from scipy import ndimage as nd
 import openslide
 import sys, argparse, os, copy, itertools, glob, datetime
+from datatype_handler.png_handler import Png_handler
+from datatype_handler.tiff_handler import Tiff_handler
+
 Image.MAX_IMAGE_PIXELS=None
 
-parser = argparse.ArgumentParser(description='Train DSMIL on 20x patch features learned by SimCLR')
+parser = argparse.ArgumentParser(description='')
 parser.add_argument('--dir', default=None, type=str, help='Image directory')
 parser.add_argument('--sample_dir', default=None, type=str, help='Reference directory')
 parser.add_argument('--store_dir', default=None, type=str, help='Result store directory')
 parser.add_argument('--level', default=0, type=int, help='WSI retrieve  level')
-parser.add_argument('--ext', default=0, type=int, help='file extend')
+parser.add_argument('--ext', default='', type=str, help='file extend')
 args = parser.parse_args()
 
 img_path = args.dir

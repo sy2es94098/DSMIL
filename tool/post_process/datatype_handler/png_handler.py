@@ -1,7 +1,9 @@
-from datatype_handler import Datatype_handler
+from datatype_handler.datatype_handler import Datatype_handler
+from PIL import Image
+import os
 Image.MAX_IMAGE_PIXELS=None
 
-class Png_handler(Pretrain_model):
+class Png_handler(Datatype_handler):
     def __init__(self, args):
         super().__init__(args)
 
@@ -11,7 +13,7 @@ class Png_handler(Pretrain_model):
 
     def resize(self, f):
         self.sample_file = Image.open(os.path.join(self.args.sample_dir,f))
-        w, h = sample_file.size
+        w, h = self.sample_file.size
         self.process_file.resize((w, h))
         return self.process_file
         

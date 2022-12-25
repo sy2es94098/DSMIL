@@ -1,8 +1,10 @@
-from datatype_handler import Datatype_handler
+from datatype_handler.datatype_handler import Datatype_handler
+from PIL import Image
+import os
 import openslide
 Image.MAX_IMAGE_PIXELS=None
 
-class Tiff_handler(Pretrain_model):
+class Tiff_handler(Datatype_handler):
     def __init__(self, args):
         super().__init__(args)
 
@@ -11,8 +13,8 @@ class Tiff_handler(Pretrain_model):
         return self.process_file
     
     def resize(self, f):
-        w, h = self.process_file.level_dimensions[args.level]
-        self.slide = self.process_file.read_region((0, 0),zoom_level, (w, h))
+        w, h = self.process_file.level_dimensions[self.args.level]
+        self.slide = self.process_file.read_region((0, 0),self.args.level, (w, h))
         return self.slide
 
     def store_file(self, f):
