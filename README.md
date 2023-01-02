@@ -167,7 +167,7 @@ At training, use
 3. Train an embedder.  
 ```
   $ cd simclr
-  $ python run.py --dataset=[DATASET_NAME]
+  $ python run.py --dataset=[DATASET_NAME] --norm_layer [LAYER] --pretrain_model [PRETRAIN_MODEL]
 ```
 >Set flag `--multiscale=1` and flag `--level=low` or `--level=high` to train an embedder for each magnification if the patches are cropped from multiple magnifications.   
 4. Compute features using the embedder.  
