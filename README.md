@@ -173,7 +173,7 @@ At training, use
 4. Compute features using the embedder.  
 ```
   $ cd ..
-  $ python compute_feats.py --dataset=[DATASET_NAME]
+  $ python compute_feats.py --dataset=[DATASET_NAME] --norm_layer [LAYER] --pretrain_model [PRETRAIN_MODEL]
 ```
 >Set flag `--magnification=tree` to compute the features for multiple magnifications.
 >This will use the last trained embedder to compute the features, if you want to use an embedder from a specific run, add the option `--weights=[RUN_NAME]`, where `[RUN_NAME]` is a folder name inside `simclr/runs/`. If you have an embedder you want to use, you can place the weight file as `simclr/runs/[RUN_NAME]/checkpoints/model.pth` and pass the `[RUN_NAME]` to this option. To use a specific embedder for each magnification, set option `--weights_low=[RUN_NAME]` (embedder for low magnification) and `--weights_high=[RUN_NAME]` (embedder for high magnification). The embedder architecture is ResNet18 with **instance normalization**.     
